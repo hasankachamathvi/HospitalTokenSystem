@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Panel - Hospital Queue</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <h1>Admin / Receptionist Panel</h1>
+
+    <!-- Add Patient Section -->
+    <div class="card">
+        <h3>Add Patient</h3>
+
+        <input type="text" id="adminName" placeholder="Patient Name">
+        <input type="number" id="position" placeholder="VIP Position (optional)">
+
+        <div class="btn-group">
+            <button onclick="addNormal()">Add Normal</button>
+            <button class="emergency" onclick="addEmergency()">Emergency</button>
+            <button class="vip" onclick="addVIP()">Insert VIP</button>
+        </div>
+    </div>
+
+    <!-- Manage Queue Section -->
+    <div class="card">
+        <h3>Manage Queue</h3>
+
+        <input type="number" id="removePos" placeholder="Position to Cancel">
+
+        <div class="btn-group">
+            <button class="serve" onclick="servePatient()">Serve Patient</button>
+            <button class="cancel" onclick="cancelToken()">Cancel Token</button>
+        </div>
+    </div>
+
+    <!-- Live Queue -->
+    <div class="card">
+        <h3>Live Queue Status</h3>
+        <ol id="adminQueue"></ol>
+    </div>
+</div>
+
+<script src="linkedlist.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
