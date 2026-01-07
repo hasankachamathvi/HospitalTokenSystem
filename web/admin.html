@@ -1,13 +1,24 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Admin Panel - Hospital Queue</title>
+    <meta charset="UTF-8">
+    <title>Hospital Queue Admin Dashboard</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="container">
-    <h1>Admin / Receptionist Panel</h1>
+<div class="dashboard">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>Hospital Admin</h2>
+        </div>
+        <ul class="nav">
+            <li onclick="showSection('overview')">Overview</li>
+            <li onclick="showSection('manage')">Manage Queue</li>
+            <li onclick="showSection('live')">Live Queue</li>
+        </ul>
+    </aside>
 
     <!-- Main Content -->
     <main class="main-content">
@@ -50,32 +61,51 @@
             </table>
         </section>
 
+        <!-- Live Queue Section -->
+        <section id="live" class="section" style="display:none;">
+            <h1>Live Queue</h1>
+            <table>
+                <thead>
+                <tr>
+                    <th>Token</th>
+                    <th>Patient Name</th>
+                </tr>
+                </thead>
+                <tbody id="adminLiveQueueTable"></tbody>
+            </table>
+        </section>
+    </main>
+</div>
+
+<!-- Popups -->
+<div id="addPatientPopup" class="popup">
+    <div class="popup-content">
+        <span class="close" onclick="closePopup('addPatientPopup')">&times;</span>
+        <h2>Add Patient</h2>
         <input type="text" id="adminName" placeholder="Patient Name">
         <input type="number" id="position" placeholder="VIP Position (optional)">
-
-        <div class="btn-group">
-            <button onclick="addNormal()">Add Normal</button>
-            <button class="emergency" onclick="addEmergency()">Emergency</button>
-            <button class="vip" onclick="addVIP()">Insert VIP</button>
+        <div class="popup-buttons">
+            <button onclick="addNormal()">Normal</button>
+            <button class="danger" onclick="addEmergency()">Emergency</button>
+            <button class="vip" onclick="addVIP()">VIP</button>
         </div>
     </div>
+</div>
 
-    <!-- Manage Queue Section -->
-    <div class="card">
-        <h3>Manage Queue</h3>
+<div id="servePopup" class="popup">
+    <div class="popup-content">
+        <span class="close" onclick="closePopup('servePopup')">&times;</span>
+        <h2>Serve Patient</h2>
+        <button class="success" onclick="servePatient()">Serve Next</button>
+    </div>
+</div>
 
+<div id="cancelPopup" class="popup">
+    <div class="popup-content">
+        <span class="close" onclick="closePopup('cancelPopup')">&times;</span>
+        <h2>Cancel Token</h2>
         <input type="number" id="removePos" placeholder="Position to Cancel">
-
-        <div class="btn-group">
-            <button class="serve" onclick="servePatient()">Serve Patient</button>
-            <button class="cancel" onclick="cancelToken()">Cancel Token</button>
-        </div>
-    </div>
-
-    <!-- Live Queue -->
-    <div class="card">
-        <h3>Live Queue Status</h3>
-        <ol id="adminQueue"></ol>
+        <button class="warning" onclick="cancelToken()">Cancel</button>
     </div>
 </div>
 

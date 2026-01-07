@@ -1,0 +1,219 @@
+/* =======================
+   General Styles
+======================= */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+/* =======================
+   Hero Section
+======================= */
+header.hero {
+    background: linear-gradient(
+            rgba(0, 123, 255, 0.85),
+            rgba(0, 123, 255, 0.85)
+    ),
+    url("images/hospital-hero.jpg") center/cover no-repeat;
+    color: white;
+    text-align: center;
+    padding: 4rem 1rem;
+}
+
+nav {
+    margin-bottom: 1.5rem;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    margin: 0 1rem;
+    font-weight: bold;
+}
+
+nav a:hover {
+    color: #ffc107;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+/* =======================
+   Hero Buttons
+======================= */
+.hero-buttons {
+    margin-top: 1.5rem;
+}
+
+.btn-primary,
+.btn-outline {
+    display: inline-block;
+    padding: 0.7rem 1.5rem;
+    margin: 0.5rem;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.btn-primary {
+    background-color: #ffc107;
+    color: #333;
+}
+
+.btn-outline {
+    border: 2px solid white;
+    color: white;
+}
+
+.btn-outline:hover {
+    background-color: white;
+    color: #007BFF;
+}
+
+/* =======================
+   Main Content
+======================= */
+.main-content {
+    max-width: 1100px;
+    margin: 3rem auto;
+    padding: 1rem;
+}
+
+/* =======================
+   About Section
+======================= */
+.about {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: center;
+    margin-bottom: 3rem;
+}
+
+.about img {
+    width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* =======================
+   Services Section
+======================= */
+.services {
+    background-color: #fff;
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.services h2 {
+    text-align: center;
+    color: #007BFF;
+    margin-bottom: 2rem;
+}
+
+/* 🔧 FIXED GRID BALANCE */
+.service-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 2rem;
+    max-width: 1100px;
+    margin: auto;
+    justify-items: center;
+}
+
+/* 🔧 SAME HEIGHT CARDS */
+.service-card {
+    background-color: #f4f8ff;
+    padding: 2rem 1.5rem;
+    border-radius: 14px;
+    text-align: center;
+
+    width: 100%;
+    max-width: 300px;
+    min-height: 380px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+/* 🔧 BIGGER SERVICE IMAGES */
+.service-card img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 1.2rem;
+}
+
+.service-card h3 {
+    color: #007BFF;
+    margin-bottom: 0.6rem;
+}
+
+.service-card p {
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+/* Hover Effects */
+.service-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 22px rgba(0,0,0,0.18);
+}
+
+.service-card:hover img {
+    transform: scale(1.05);
+    transition: transform 0.3s;
+}
+
+/* =======================
+   Why Choose Us
+======================= */
+.why-us {
+    margin: 3rem 0;
+    text-align: center;
+}
+
+.why-us ul {
+    list-style: none;
+    padding: 0;
+}
+
+.why-us li {
+    padding: 0.6rem;
+    font-size: 1.1rem;
+}
+
+/* =======================
+   Footer
+======================= */
+footer {
+    background-color: #222;
+    color: #ccc;
+    text-align: center;
+    padding: 1rem;
+}
+
+/* =======================
+   Responsive
+======================= */
+@media (max-width: 768px) {
+    .about {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    nav a {
+        display: block;
+        margin: 0.5rem 0;
+    }
+}
