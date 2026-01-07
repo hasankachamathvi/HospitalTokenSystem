@@ -9,9 +9,46 @@
 <div class="container">
     <h1>Admin / Receptionist Panel</h1>
 
-    <!-- Add Patient Section -->
-    <div class="card">
-        <h3>Add Patient</h3>
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Overview Section -->
+        <section id="overview" class="section">
+            <h1>Dashboard Overview</h1>
+            <div class="cards">
+                <div class="card">
+                    <h3>Total Patients</h3>
+                    <p id="totalPatients">0</p>
+                </div>
+                <div class="card">
+                    <h3>Waiting</h3>
+                    <p id="waitingPatients">0</p>
+                </div>
+                <div class="card">
+                    <h3>Served</h3>
+                    <p id="servedPatients">0</p>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button onclick="openPopup('addPatientPopup')">Add Patient</button>
+                <button class="danger" onclick="openPopup('servePopup')">Serve Patient</button>
+                <button class="warning" onclick="openPopup('cancelPopup')">Cancel Token</button>
+            </div>
+        </section>
+
+        <!-- Manage Queue Section -->
+        <section id="manage" class="section" style="display:none;">
+            <h1>Manage Queue</h1>
+            <table>
+                <thead>
+                <tr>
+                    <th>Token</th>
+                    <th>Patient Name</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody id="adminQueueTable"></tbody>
+            </table>
+        </section>
 
         <input type="text" id="adminName" placeholder="Patient Name">
         <input type="number" id="position" placeholder="VIP Position (optional)">
