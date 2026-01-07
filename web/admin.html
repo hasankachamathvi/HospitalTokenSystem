@@ -4,6 +4,63 @@
     <meta charset="UTF-8">
     <title>Hospital Queue Admin Dashboard</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Simple popup style */
+        #addPatientPopup {
+            display: none;
+            position: fixed;
+            top:0; left:0;
+            width:100%; height:100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        #addPatientPopup .popup-content {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 10px;
+            max-width: 400px;
+            margin:auto;
+            position: relative;
+        }
+        #addPatientPopup input {
+            width: 100%;
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+        }
+        #addPatientPopup button {
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            background: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #addPatientPopup .close {
+            position: absolute;
+            top:10px;
+            right:15px;
+            font-size:20px;
+            cursor:pointer;
+        }
+        table th, table td {
+            padding: 0.5rem;
+            border:1px solid #ddd;
+        }
+        table th {
+            background: #007BFF;
+            color:white;
+        }
+        button.serveBtn {
+            padding: 0.3rem 0.5rem;
+            background: green;
+            color:white;
+            border:none;
+            border-radius:3px;
+            cursor:pointer;
+        }
+    </style>
 </head>
 <body>
 
@@ -39,10 +96,8 @@
                     <p id="servedPatients">0</p>
                 </div>
             </div>
-            <div class="action-buttons">
-                <button onclick="openPopup('addPatientPopup')">Add Patient</button>
-                <button class="danger" onclick="openPopup('servePopup')">Serve Patient</button>
-                <button class="warning" onclick="openPopup('cancelPopup')">Cancel Token</button>
+            <div style="text-align:center; margin-top:1rem;">
+                <button onclick="openAddPatient()">Add Patient</button>
             </div>
         </section>
 
@@ -53,7 +108,10 @@
                 <thead>
                 <tr>
                     <th>Token</th>
-                    <th>Patient Name</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Date</th>
                     <th>Action</th>
                 </tr>
                 </thead>
@@ -68,7 +126,10 @@
                 <thead>
                 <tr>
                     <th>Token</th>
-                    <th>Patient Name</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Date</th>
                 </tr>
                 </thead>
                 <tbody id="adminLiveQueueTable"></tbody>
@@ -77,39 +138,99 @@
     </main>
 </div>
 
-<!-- Popups -->
-<div id="addPatientPopup" class="popup">
+<!-- Add Patient Popup -->
+<div id="addPatientPopup">
     <div class="popup-content">
-        <span class="close" onclick="closePopup('addPatientPopup')">&times;</span>
+        <span class="close" onclick="closeAddPatient()">&times;</span>
         <h2>Add Patient</h2>
-        <input type="text" id="adminName" placeholder="Patient Name">
-        <input type="number" id="position" placeholder="VIP Position (optional)">
-        <div class="popup-buttons">
-            <button onclick="addNormal()">Normal</button>
-            <button class="danger" onclick="addEmergency()">Emergency</button>
-            <button class="vip" onclick="addVIP()">VIP</button>
-        </div>
-    </div>
-</div>
-
-<div id="servePopup" class="popup">
-    <div class="popup-content">
-        <span class="close" onclick="closePopup('servePopup')">&times;</span>
-        <h2>Serve Patient</h2>
-        <button class="success" onclick="servePatient()">Serve Next</button>
-    </div>
-</div>
-
-<div id="cancelPopup" class="popup">
-    <div class="popup-content">
-        <span class="close" onclick="closePopup('cancelPopup')">&times;</span>
-        <h2>Cancel Token</h2>
-        <input type="number" id="removePos" placeholder="Position to Cancel">
-        <button class="warning" onclick="cancelToken()">Cancel</button>
+        <input type="text" id="adminPatientName" placeholder="Full Name">
+        <input type="email" id="adminPatientEmail" placeholder="Email">
+        <input type="tel" id="adminPatientPhone" placeholder="Phone">
+        <input type="datetime-local" id="adminPatientDate">
+        <button onclick="addPatientFromAdmin()">Add</button>
     </div>
 </div>
 
 <script src="linkedlist.js"></script>
-<script src="app.js"></script>
+<script>
+    function showSection(id) {
+        document.querySelectorAll('.section').forEach(s => s.style.display='none');
+        document.getElementById(id).style.display = 'block';
+    }
+
+    // Popup controls
+    function openAddPatient() {
+        document.getElementById("addPatientPopup").style.display = "flex";
+    }
+    function closeAddPatient() {
+        document.getElementById("addPatientPopup").style.display = "none";
+    }
+
+    // Add patient from admin dashboard
+    function addPatientFromAdmin() {
+        const patient = {
+            name: document.getElementById("adminPatientName").value.trim(),
+            email: document.getElementById("adminPatientEmail").value.trim(),
+            phone: document.getElementById("adminPatientPhone").value.trim(),
+            date: document.getElementById("adminPatientDate").value
+        };
+        if(!patient.name || !patient.email || !patient.phone || !patient.date){
+            return alert("Please fill all fields");
+        }
+
+        queue.insertAtEnd(patient);
+
+        document.getElementById("adminPatientName").value = "";
+        document.getElementById("adminPatientEmail").value = "";
+        document.getElementById("adminPatientPhone").value = "";
+        document.getElementById("adminPatientDate").value = "";
+
+        closeAddPatient();
+        updateAdminTables();
+    }
+
+    // Display queue in Manage & Live tables
+    function updateAdminTables() {
+        const patients = queue.traverse();
+
+        const manageTable = document.getElementById('adminQueueTable');
+        const liveTable = document.getElementById('adminLiveQueueTable');
+
+        manageTable.innerHTML = "";
+        liveTable.innerHTML = "";
+
+        patients.forEach((p, index) => {
+            // Manage table
+            const row = manageTable.insertRow();
+            row.insertCell(0).innerText = index+1;
+            row.insertCell(1).innerText = p.name;
+            row.insertCell(2).innerText = p.email;
+            row.insertCell(3).innerText = p.phone;
+            row.insertCell(4).innerText = p.date;
+            const actionCell = row.insertCell(5);
+            const serveBtn = document.createElement('button');
+            serveBtn.className = "serveBtn";
+            serveBtn.innerText = "Serve";
+            serveBtn.onclick = () => { queue.deleteFromPosition(index); updateAdminTables(); };
+            actionCell.appendChild(serveBtn);
+
+            // Live table
+            const liveRow = liveTable.insertRow();
+            liveRow.insertCell(0).innerText = index+1;
+            liveRow.insertCell(1).innerText = p.name;
+            liveRow.insertCell(2).innerText = p.email;
+            liveRow.insertCell(3).innerText = p.phone;
+            liveRow.insertCell(4).innerText = p.date;
+        });
+
+        // Update overview cards
+        document.getElementById('totalPatients').innerText = patients.length;
+        document.getElementById('waitingPatients').innerText = patients.length;
+    }
+
+    // Live update every 2 sec
+    setInterval(updateAdminTables, 2000);
+</script>
+
 </body>
 </html>

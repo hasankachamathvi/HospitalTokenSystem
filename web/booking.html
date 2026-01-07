@@ -5,36 +5,26 @@
     <title>Book Appointment</title>
     <link rel="stylesheet" href="webstyle.css">
     <style>
-        /* Only minor style for centering form card */
-        main {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 2rem 1rem;
-        }
         .booking-card {
-            background-color: white;
+            background-color: #fff;
             padding: 2rem 3rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 400px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            max-width: 450px;
+            margin: 2rem auto;
             text-align: center;
-            margin-bottom: 2rem;
         }
         .booking-card input {
             width: 100%;
             padding: 0.7rem;
             margin-bottom: 1rem;
-            border-radius: 5px;
+            border-radius: 6px;
             border: 1px solid #ccc;
-            font-size: 1rem;
         }
         .booking-card button {
             padding: 0.7rem 1.5rem;
-            font-size: 1rem;
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
             background-color: #007BFF;
             color: white;
             cursor: pointer;
@@ -43,15 +33,15 @@
             background-color: #0056b3;
         }
         table {
-            width: 100%;
-            max-width: 600px;
+            width: 90%;
+            max-width: 800px;
+            margin: 2rem auto;
             border-collapse: collapse;
-            margin-top: 1rem;
             text-align: center;
-            background-color: white;
             border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            background-color: #fff;
         }
         th, td {
             padding: 0.8rem;
@@ -68,49 +58,87 @@
 </head>
 <body>
 
-<header>
+<header class="hero">
     <nav>
         <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="services.html">Services</a>
         <a href="doctors.html">Doctors</a>
         <a href="booking.html">Book Appointment</a>
+        <a href="admin.html">Admin</a>
     </nav>
-    <h1>Book Your Appointment</h1>
+    <h1>HealthyLife Hospital</h1>
+    <p>Your trusted partner in quality healthcare</p>
 </header>
 
-<main>
+<main class="main-content">
     <div class="booking-card">
-        <h2>Enter Your Name</h2>
         <input type="text" id="patientName" placeholder="Full Name">
+        <input type="email" id="patientEmail" placeholder="Email">
+        <input type="tel" id="patientPhone" placeholder="Phone">
+        <input type="datetime-local" id="appointmentDate">
         <button onclick="bookPatient()">Book Appointment</button>
     </div>
 
-    <h2>Current Queue</h2>
+    <h2 style="text-align:center;">Current Queue</h2>
     <table>
         <thead>
         <tr>
             <th>Token</th>
-            <th>Patient Name</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Date</th>
         </tr>
         </thead>
         <tbody id="queueList"></tbody>
     </table>
 </main>
 
+<footer>
+    <p>© 2026 HealthyLife Hospital. All rights reserved.</p>
+</footer>
+
 <script src="linkedlist.js"></script>
-<script src="app.js"></script>
 <script>
-    // Wrapper to connect booking form to your existing addNormal logic
     function bookPatient() {
-        const name = document.getElementById("patientName").value;
-        if (!name) return alert("Please enter your name");
+        const patient = {
+            name: document.getElementById("patientName").value,
+            email: document.getElementById("patientEmail").value,
+            phone: document.getElementById("patientPhone").value,
+            date: document.getElementById("appointmentDate").value
+        };
 
-        // Use your existing addNormal logic
-        queue.insertAtEnd(name); // same as addNormal
-        displayQueue("queueList"); // reuse your display function
+        if (!patient.name || !patient.email || !patient.phone || !patient.date) {
+            return alert("Please fill all fields");
+        }
 
-        // Clear input
+        queue.insertAtEnd(patient);
+        displayQueue("queueList");
+
         document.getElementById("patientName").value = "";
+        document.getElementById("patientEmail").value = "";
+        document.getElementById("patientPhone").value = "";
+        document.getElementById("appointmentDate").value = "";
     }
+
+    function displayQueue(tableId) {
+        const table = document.getElementById(tableId);
+        table.innerHTML = "";
+        const patients = queue.traverse();
+        patients.forEach((p, index) => {
+            const row = table.insertRow();
+            row.insertCell(0).innerText = index + 1;
+            row.insertCell(1).innerText = p.name;
+            row.insertCell(2).innerText = p.email;
+            row.insertCell(3).innerText = p.phone;
+            row.insertCell(4).innerText = p.date;
+        });
+    }
+
+    // Optional: live update
+    setInterval(() => displayQueue("queueList"), 2000);
 </script>
+
 </body>
 </html>
