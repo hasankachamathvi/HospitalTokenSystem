@@ -6,7 +6,84 @@
 </head>
 <body>
 
-<h2>🏥 Hospital Token Queue - Patient</h2>
+<header class="hero">
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="doctors.html">Doctors</a>
+        <a href="booking.html">Book Appointment</a>
+        <a href="admin.html">Admin</a>
+    </nav>
+
+    <h1>HealthyLife Hospital</h1>
+    <p>Your trusted partner in quality healthcare</p>
+
+    <div class="hero-buttons">
+        <a href="booking.html" class="btn-primary">Book Appointment</a>
+        <a href="doctors.html" class="btn-outline">View Doctors</a>
+    </div>
+</header>
+
+<main class="main-content">
+
+    <!-- ABOUT SECTION -->
+    <section class="about">
+        <img src="hospital-banner.jpg" alt="Hospital">
+
+        <div>
+            <h2>About Us</h2>
+            <p>
+                HealthyLife Hospital is committed to providing reliable, affordable,
+                and high-quality healthcare services. Our experienced medical professionals
+                ensure patient safety, comfort, and timely treatment.
+            </p>
+        </div>
+    </section>
+
+    <!-- SERVICES SECTION -->
+    <section class="services">
+        <h2>Our Services</h2>
+
+        <div class="service-cards">
+
+            <div class="service-card">
+                <img src="consultation.png">
+                <h3>General Consultation</h3>
+                <p>Comprehensive diagnosis and primary healthcare services.</p>
+            </div>
+
+            <div class="service-card">
+                <img src="cardiology.png">
+                <h3>Cardiology</h3>
+                <p>Advanced heart care with modern medical equipment.</p>
+            </div>
+
+            <div class="service-card">
+                <img src="neurology.png">
+                <h3>Neurology</h3>
+                <p>Expert treatment for brain and nervous system conditions.</p>
+            </div>
+
+            <div class="service-card">
+                <img src="pediatrics.png">
+                <h3>Pediatrics</h3>
+                <p>Specialized healthcare for infants and children.</p>
+            </div>
+
+            <div class="service-card">
+                <img src="orthopedics.png">
+                <h3>Orthopedics</h3>
+                <p>Advanced care for bone, joint, and muscle conditions.</p>
+            </div>
+
+            <div class="service-card">
+                <img src="emergency.png">
+                <h3>Emergency Care</h3>
+                <p>24/7 emergency medical services with rapid response.</p>
+            </div>
+
+        </div>
+    </section>
+
 
 <input type="text" id="patientName" placeholder="Enter Patient Name">
 <button onclick="bookToken()">Book Token</button>
