@@ -105,8 +105,6 @@
         <tr>
             <th>Token</th>
             <th>Name</th>
-            <th>Email</th>
-            <th>Phone</th>
             <th>Date</th>
             <th>Priority</th>
         </tr>
@@ -199,7 +197,7 @@
             if (!queuePatients || queuePatients.length === 0) {
                 const row = table.insertRow();
                 const cell = row.insertCell(0);
-                cell.colSpan = 6;
+                cell.colSpan = 4;
                 cell.innerText = "No appointments in queue";
                 cell.style.textAlign = "center";
                 
@@ -220,11 +218,9 @@
                 const row = table.insertRow();
                 row.insertCell(0).innerText = p.queue_position || (index + 1);
                 row.insertCell(1).innerText = p.name || 'N/A';
-                row.insertCell(2).innerText = p.email || 'N/A';
-                row.insertCell(3).innerText = p.phone || 'N/A';
-                row.insertCell(4).innerText = p.date || 'N/A';
+                row.insertCell(2).innerText = p.date || 'N/A';
                 
-                const priorityCell = row.insertCell(5);
+                const priorityCell = row.insertCell(3);
                 priorityCell.innerHTML = `<span style="background:${priorityColor};color:white;padding:3px 8px;border-radius:3px;font-size:12px;">${p.priority?.toUpperCase() || 'NORMAL'}</span>`;
                 
                 if(p.status === 'waiting') waitingCount++;
@@ -248,7 +244,7 @@
             table.innerHTML = "";
             const row = table.insertRow();
             const cell = row.insertCell(0);
-            cell.colSpan = 6;
+            cell.colSpan = 4;
             cell.innerText = "Error loading appointments. Please check console.";
             cell.style.textAlign = "center";
             cell.style.color = "red";
