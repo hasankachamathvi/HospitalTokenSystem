@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Book Appointment</title>
     <link rel="stylesheet" href="webstyle.css">
+    <script src="linkedlist.js"></script>
     <style>
         .booking-card {
             background-color: #fff;
@@ -119,6 +120,9 @@
 </footer>
 
 <script>
+    // Initialize LinkedList for queue management
+    const patientQueue = new LinkedList();
+    
     function bookPatient() {
         const patient = {
             name: document.getElementById("patientName").value,
@@ -145,6 +149,11 @@
         .then(response => response.json())
         .then(data => {
             if(data.status === 'success') {
+                // Add to LinkedList using insertAtEnd (normal priority patients go to end)
+                console.log('Using LinkedList: Adding patient to end of queue (insertAtEnd operation)');
+                patientQueue.insertAtEnd(patient);
+                console.log('Current LinkedList queue:', patientQueue.traverse());
+                
                 alert('Appointment booked successfully!');
                 // Clear form
                 document.getElementById("patientName").value = "";
@@ -173,10 +182,21 @@
         })
         .then(patients => {
             console.log('Fetched patients:', patients);
+            
+            // Rebuild LinkedList from database
+            patientQueue.head = null; // Reset LinkedList
+            patients.forEach(p => {
+                patientQueue.insertAtEnd(p); // Populate LinkedList
+            });
+            
+            // Get patients from LinkedList using traverse method
+            const queuePatients = patientQueue.traverse();
+            console.log('LinkedList Queue (traverse):', queuePatients);
+            
             const table = document.getElementById("queueList");
             table.innerHTML = "";
             
-            if (!patients || patients.length === 0) {
+            if (!queuePatients || queuePatients.length === 0) {
                 const row = table.insertRow();
                 const cell = row.insertCell(0);
                 cell.colSpan = 6;
@@ -191,7 +211,7 @@
             
             let waitingCount = 0;
             
-            patients.forEach((p, index) => {
+            queuePatients.forEach((p, index) => {
                 // Priority badge color
                 let priorityColor = '#28a745'; // green for normal
                 if(p.priority === 'vip') priorityColor = '#ffc107'; // yellow

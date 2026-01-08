@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <title>Hospital Queue Admin Dashboard</title>
     <link rel="stylesheet" href="style.css">
+    <script src="linkedlist.js"></script>
     <style>
-        /* Simple popup style */
+
         #addPatientPopup {
             display: none;
             position: fixed;
@@ -78,7 +79,6 @@
 </script>
 
 <div class="dashboard">
-    <!-- Sidebar -->
     <aside class="sidebar">
         <div class="sidebar-header">
             <h2>Hospital Admin</h2>
@@ -95,7 +95,6 @@
 
     <!-- Main Content -->
     <main class="main-content">
-        <!-- Overview Section -->
         <section id="overview" class="section">
             <h1>Dashboard Overview</h1>
             <div class="cards">
@@ -182,6 +181,9 @@
 </div>
 
 <script>
+    // Initialize LinkedList for queue management
+    const patientQueue = new LinkedList();
+    
     function showSection(id) {
         document.querySelectorAll('.section').forEach(s => s.style.display='none');
         document.getElementById(id).style.display = 'block';
@@ -195,7 +197,6 @@
         document.getElementById("addPatientPopup").style.display = "none";
     }
 
-    // Add patient from admin dashboard
     // Add patient from admin dashboard
     function addPatientFromAdmin() {
         const patient = {
@@ -231,6 +232,23 @@
             try {
                 const data = JSON.parse(text);
                 if(data.status === 'success') {
+                    // Add to LinkedList based on priority
+                    if(patient.priority === 'emergency') {
+                        console.log('Using LinkedList: Adding EMERGENCY patient (insertAtBeginning operation)');
+                        patientQueue.insertAtBeginning(patient);
+                    } else if(patient.priority === 'vip') {
+                        console.log('Using LinkedList: Adding VIP patient (insertAtPosition operation)');
+                        // Insert VIP after emergency but before normal
+                        const patients = patientQueue.traverse();
+                        let insertPos = patients.findIndex(p => p.priority !== 'emergency');
+                        if(insertPos === -1) insertPos = patients.length;
+                        patientQueue.insertAtPosition(patient, insertPos);
+                    } else {
+                        console.log('Using LinkedList: Adding NORMAL patient (insertAtEnd operation)');
+                        patientQueue.insertAtEnd(patient);
+                    }
+                    console.log('Current LinkedList queue:', patientQueue.traverse());
+                    
                     alert('Patient added successfully!');
                     // Clear form
                     document.getElementById("adminPatientName").value = "";
@@ -260,6 +278,16 @@
         fetch('get_queue.php')
         .then(response => response.json())
         .then(patients => {
+            // Clear and rebuild LinkedList from database
+            patientQueue.head = null; // Reset LinkedList
+            patients.forEach(p => {
+                patientQueue.insertAtEnd(p); // Use LinkedList insertAtEnd method
+            });
+            
+            // Get patients from LinkedList using traverse method
+            const queuePatients = patientQueue.traverse();
+            console.log('LinkedList Queue:', queuePatients); // Show LinkedList is being used
+            
             const manageTable = document.getElementById('adminQueueTable');
             const liveTable = document.getElementById('adminLiveQueueTable');
 
@@ -267,11 +295,11 @@
             liveTable.innerHTML = "";
 
             let waitingCount = 0;
-            patients.forEach((p, index) => {
-                // Priority badge color
-                let priorityColor = '#28a745'; // green for normal
-                if(p.priority === 'vip') priorityColor = '#ffc107'; // yellow
-                if(p.priority === 'emergency') priorityColor = '#dc3545'; // red
+            queuePatients.forEach((p, index) => {
+                // Priority badge
+                let priorityColor = '#28a745'; 
+                if(p.priority === 'vip') priorityColor = '#ffc107';
+                if(p.priority === 'emergency') priorityColor = '#dc3545'; 
                 
                 // Manage table
                 const row = manageTable.insertRow();
@@ -330,9 +358,15 @@
         });
     }
 
-    // Serve patient
+    // Serve patient - uses LinkedList deleteFromBeginning
     function servePatient(patientId) {
         if(!confirm('Mark this patient as served?')) return;
+        
+        console.log('Using LinkedList: Serving patient (deleteFromBeginning operation)');
+        
+        // Remove from LinkedList first (simulating queue FIFO)
+        patientQueue.deleteFromBeginning();
+        console.log('Patient removed from LinkedList. Remaining queue:', patientQueue.traverse());
         
         const formData = new FormData();
         formData.append('id', patientId);
@@ -354,9 +388,19 @@
         });
     }
     
-    // Delete patient
+    // Delete patient - uses LinkedList deleteFromPosition
     function deletePatient(patientId) {
         if(!confirm('Are you sure you want to delete this patient from the queue?')) return;
+        
+        // Find position in LinkedList
+        const patients = patientQueue.traverse();
+        const position = patients.findIndex(p => p.id === patientId);
+        
+        if(position !== -1) {
+            console.log(`Using LinkedList: Deleting patient at position ${position} (deleteFromPosition operation)`);
+            patientQueue.deleteFromPosition(position);
+            console.log('Patient removed from LinkedList. Remaining queue:', patientQueue.traverse());
+        }
         
         const formData = new FormData();
         formData.append('id', patientId);
