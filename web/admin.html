@@ -64,6 +64,19 @@
 </head>
 <body>
 
+<script>
+    // Check if admin is logged in
+    fetch('check_session.php')
+    .then(response => {
+        if (!response.ok) {
+            window.location.href = 'login.html';
+        }
+    })
+    .catch(() => {
+        window.location.href = 'login.html';
+    });
+</script>
+
 <div class="dashboard">
     <!-- Sidebar -->
     <aside class="sidebar">
@@ -74,6 +87,9 @@
             <li onclick="showSection('overview')">Overview</li>
             <li onclick="showSection('manage')">Manage Queue</li>
             <li onclick="showSection('live')">Live Queue</li>
+            <li style="margin-top:auto; border-top:1px solid #ddd; padding-top:1rem;">
+                <a href="logout.php" style="color:#dc3545; text-decoration:none; display:block;">Logout</a>
+            </li>
         </ul>
     </aside>
 
@@ -112,7 +128,8 @@
                     <th>Email</th>
                     <th>Phone</th>
                     <th>Date</th>
-                    <th>Action</th>
+                    <th>Priority</th>
+                    <th>Actions</th>
                 </tr>
                 </thead>
                 <tbody id="adminQueueTable"></tbody>
@@ -130,6 +147,7 @@
                     <th>Email</th>
                     <th>Phone</th>
                     <th>Date</th>
+                    <th>Priority</th>
                 </tr>
                 </thead>
                 <tbody id="adminLiveQueueTable"></tbody>
@@ -147,11 +165,22 @@
         <input type="email" id="adminPatientEmail" placeholder="Email">
         <input type="tel" id="adminPatientPhone" placeholder="Phone">
         <input type="datetime-local" id="adminPatientDate">
+        
+        <label for="adminPriority">Priority:</label>
+        <select id="adminPriority" style="width:100%; padding:0.5rem; margin:0.5rem 0; border-radius:5px;">
+            <option value="normal">Normal</option>
+            <option value="vip">VIP</option>
+            <option value="emergency">Emergency</option>
+        </select>
+        
+        <p style="font-size:12px; color:#666; margin:0.5rem 0;">
+            <strong>Note:</strong> Emergency patients go first, VIP after emergency, Normal patients go last.
+        </p>
+        
         <button onclick="addPatientFromAdmin()">Add</button>
     </div>
 </div>
 
-<script src="linkedlist.js"></script>
 <script>
     function showSection(id) {
         document.querySelectorAll('.section').forEach(s => s.style.display='none');
@@ -167,66 +196,192 @@
     }
 
     // Add patient from admin dashboard
+    // Add patient from admin dashboard
     function addPatientFromAdmin() {
         const patient = {
             name: document.getElementById("adminPatientName").value.trim(),
             email: document.getElementById("adminPatientEmail").value.trim(),
             phone: document.getElementById("adminPatientPhone").value.trim(),
-            date: document.getElementById("adminPatientDate").value
+            date: document.getElementById("adminPatientDate").value,
+            priority: document.getElementById("adminPriority").value
         };
+        
         if(!patient.name || !patient.email || !patient.phone || !patient.date){
             return alert("Please fill all fields");
         }
 
-        queue.insertAtEnd(patient);
+        // Send data to server
+        const formData = new FormData();
+        formData.append('name', patient.name);
+        formData.append('email', patient.email);
+        formData.append('phone', patient.phone);
+        formData.append('date', patient.date);
+        formData.append('priority', patient.priority);
 
-        document.getElementById("adminPatientName").value = "";
-        document.getElementById("adminPatientEmail").value = "";
-        document.getElementById("adminPatientPhone").value = "";
-        document.getElementById("adminPatientDate").value = "";
-
-        closeAddPatient();
-        updateAdminTables();
+        fetch('add_patient_position.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            return response.text();
+        })
+        .then(text => {
+            console.log('Raw response:', text);
+            try {
+                const data = JSON.parse(text);
+                if(data.status === 'success') {
+                    alert('Patient added successfully!');
+                    // Clear form
+                    document.getElementById("adminPatientName").value = "";
+                    document.getElementById("adminPatientEmail").value = "";
+                    document.getElementById("adminPatientPhone").value = "";
+                    document.getElementById("adminPatientDate").value = "";
+                    document.getElementById("adminPriority").value = "normal";
+                    closeAddPatient();
+                    // Refresh tables
+                    updateAdminTables();
+                } else {
+                    alert('Error: ' + (data.message || 'Failed to add patient'));
+                }
+            } catch(e) {
+                console.error('Parse error:', e);
+                alert('Server error: ' + text);
+            }
+        })
+        .catch(error => {
+            alert('Network error: ' + error.message);
+            console.error(error);
+        });
     }
 
     // Display queue in Manage & Live tables
     function updateAdminTables() {
-        const patients = queue.traverse();
+        fetch('get_queue.php')
+        .then(response => response.json())
+        .then(patients => {
+            const manageTable = document.getElementById('adminQueueTable');
+            const liveTable = document.getElementById('adminLiveQueueTable');
 
-        const manageTable = document.getElementById('adminQueueTable');
-        const liveTable = document.getElementById('adminLiveQueueTable');
+            manageTable.innerHTML = "";
+            liveTable.innerHTML = "";
 
-        manageTable.innerHTML = "";
-        liveTable.innerHTML = "";
+            let waitingCount = 0;
+            patients.forEach((p, index) => {
+                // Priority badge color
+                let priorityColor = '#28a745'; // green for normal
+                if(p.priority === 'vip') priorityColor = '#ffc107'; // yellow
+                if(p.priority === 'emergency') priorityColor = '#dc3545'; // red
+                
+                // Manage table
+                const row = manageTable.insertRow();
+                row.insertCell(0).innerText = p.queue_position || (index+1);
+                row.insertCell(1).innerText = p.name;
+                row.insertCell(2).innerText = p.email;
+                row.insertCell(3).innerText = p.phone;
+                row.insertCell(4).innerText = p.date;
+                
+                const priorityCell = row.insertCell(5);
+                priorityCell.innerHTML = `<span style="background:${priorityColor};color:white;padding:3px 8px;border-radius:3px;font-size:12px;">${p.priority?.toUpperCase() || 'NORMAL'}</span>`;
+                
+                const actionCell = row.insertCell(6);
+                const serveBtn = document.createElement('button');
+                serveBtn.className = "serveBtn";
+                serveBtn.innerText = "Serve";
+                serveBtn.onclick = () => servePatient(p.id);
+                actionCell.appendChild(serveBtn);
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = "serveBtn";
+                deleteBtn.style.background = "#dc3545";
+                deleteBtn.style.marginLeft = "5px";
+                deleteBtn.innerText = "Delete";
+                deleteBtn.onclick = () => deletePatient(p.id);
+                actionCell.appendChild(deleteBtn);
 
-        patients.forEach((p, index) => {
-            // Manage table
-            const row = manageTable.insertRow();
-            row.insertCell(0).innerText = index+1;
-            row.insertCell(1).innerText = p.name;
-            row.insertCell(2).innerText = p.email;
-            row.insertCell(3).innerText = p.phone;
-            row.insertCell(4).innerText = p.date;
-            const actionCell = row.insertCell(5);
-            const serveBtn = document.createElement('button');
-            serveBtn.className = "serveBtn";
-            serveBtn.innerText = "Serve";
-            serveBtn.onclick = () => { queue.deleteFromPosition(index); updateAdminTables(); };
-            actionCell.appendChild(serveBtn);
+                // Live table
+                const liveRow = liveTable.insertRow();
+                liveRow.insertCell(0).innerText = p.queue_position || (index+1);
+                liveRow.insertCell(1).innerText = p.name;
+                liveRow.insertCell(2).innerText = p.email;
+                liveRow.insertCell(3).innerText = p.phone;
+                liveRow.insertCell(4).innerText = p.date;
+                
+                const livePriorityCell = liveRow.insertCell(5);
+                livePriorityCell.innerHTML = `<span style="background:${priorityColor};color:white;padding:3px 8px;border-radius:3px;font-size:12px;">${p.priority?.toUpperCase() || 'NORMAL'}</span>`;
+                
+                if(p.status === 'waiting') waitingCount++;
+            });
 
-            // Live table
-            const liveRow = liveTable.insertRow();
-            liveRow.insertCell(0).innerText = index+1;
-            liveRow.insertCell(1).innerText = p.name;
-            liveRow.insertCell(2).innerText = p.email;
-            liveRow.insertCell(3).innerText = p.phone;
-            liveRow.insertCell(4).innerText = p.date;
+            // Update overview cards
+            document.getElementById('totalPatients').innerText = patients.length;
+            document.getElementById('waitingPatients').innerText = waitingCount;
+            
+            // Fetch served count
+            fetch('get_served_count.php')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('servedPatients').innerText = data.count || 0;
+            })
+            .catch(error => console.error('Error fetching served count:', error));
+        })
+        .catch(error => {
+            console.error('Error fetching queue:', error);
         });
-
-        // Update overview cards
-        document.getElementById('totalPatients').innerText = patients.length;
-        document.getElementById('waitingPatients').innerText = patients.length;
     }
+
+    // Serve patient
+    function servePatient(patientId) {
+        if(!confirm('Mark this patient as served?')) return;
+        
+        const formData = new FormData();
+        formData.append('id', patientId);
+        
+        fetch('serve_patient.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.status === 'success') {
+                updateAdminTables();
+            } else {
+                alert('Error serving patient');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+    
+    // Delete patient
+    function deletePatient(patientId) {
+        if(!confirm('Are you sure you want to delete this patient from the queue?')) return;
+        
+        const formData = new FormData();
+        formData.append('id', patientId);
+        
+        fetch('delete_patient.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.status === 'success') {
+                alert('Patient deleted successfully!');
+                updateAdminTables();
+            } else {
+                alert('Error: ' + (data.message || 'Failed to delete patient'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error deleting patient');
+        });
+    }
+
+    // Load data on page load
+    updateAdminTables();
 
     // Live update every 2 sec
     setInterval(updateAdminTables, 2000);

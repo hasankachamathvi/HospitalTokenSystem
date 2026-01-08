@@ -1,7 +1,9 @@
 <?php
+require_once 'db_config.php';
 header('Content-Type: application/json');
-$mysqli = new mysqli("localhost", "root", "", "hospital");
-$result = $mysqli->query("SELECT * FROM patients WHERE status='waiting' ORDER BY created_at ASC");
+
+$mysqli = getDBConnection();
+$result = $mysqli->query("SELECT * FROM patients WHERE status='waiting' ORDER BY queue_position ASC");
 $patients = [];
 while($row = $result->fetch_assoc()){
     $patients[] = $row;

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Login - HealthyLife Hospital</title>
+    <link rel="stylesheet" href="webstyle.css">
+    <style>
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 70vh;
+            padding: 2rem;
+        }
+        .login-card {
+            background-color: #fff;
+            padding: 3rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+        .login-card h2 {
+            margin-top: 0;
+            color: #007BFF;
+            margin-bottom: 2rem;
+        }
+        .login-card input {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+        .login-card button {
+            width: 100%;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 6px;
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .login-card button:hover {
+            background-color: #0056b3;
+        }
+        .error-msg {
+            color: #dc3545;
+            margin-bottom: 1rem;
+            font-size: 14px;
+            display: none;
+        }
+        .back-link {
+            margin-top: 1rem;
+            font-size: 14px;
+        }
+        .back-link a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<header class="hero">
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="services.html">Services</a>
+        <a href="doctors.html">Doctors</a>
+        <a href="booking.html">Book Appointment</a>
+        <a href="login.html">Admin</a>
+    </nav>
+    <h1>HealthyLife Hospital</h1>
+    <p>Your trusted partner in quality healthcare</p>
+</header>
+
+<main class="login-container">
+    <div class="login-card">
+        <h2>Admin Login</h2>
+        <div id="errorMsg" class="error-msg"></div>
+        <input type="text" id="username" placeholder="Username" autocomplete="username">
+        <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+        <button onclick="login()">Login</button>
+        <div class="back-link">
+            <a href="index.html">← Back to Home</a>
+        </div>
+    </div>
+</main>
+
+<footer>
+    <p>© 2026 HealthyLife Hospital. All rights reserved.</p>
+</footer>
+
+<script>
+    function login() {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const errorMsg = document.getElementById('errorMsg');
+
+        if (!username || !password) {
+            errorMsg.innerText = 'Please enter both username and password';
+            errorMsg.style.display = 'block';
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('username', username);
+        formData.append('password', password);
+
+        fetch('login.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                window.location.href = 'admin.html';
+            } else {
+                errorMsg.innerText = data.message || 'Invalid credentials';
+                errorMsg.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            errorMsg.innerText = 'Login error. Please try again.';
+            errorMsg.style.display = 'block';
+            console.error('Error:', error);
+        });
+    }
+
+    // Allow Enter key to submit
+    document.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            login();
+        }
+    });
+</script>
+
+</body>
+</html>

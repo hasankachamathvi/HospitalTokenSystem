@@ -8,22 +8,22 @@ $id = $_POST['id'] ?? 0;
 if($id){
     $mysqli->begin_transaction();
     try {
-        // Get the queue position of the patient to be served
+        // Get the queue position of the patient to be deleted
         $result = $mysqli->query("SELECT queue_position FROM patients WHERE id=$id AND status='waiting'");
         if($result && $row = $result->fetch_assoc()) {
-            $servedPos = $row['queue_position'];
+            $deletedPos = $row['queue_position'];
             
-            // Mark patient as served and remove from linked list (set queue_position to NULL)
-            $stmt = $mysqli->prepare("UPDATE patients SET status='served', queue_position=NULL WHERE id=?");
+            // Delete the patient (remove from linked list)
+            $stmt = $mysqli->prepare("DELETE FROM patients WHERE id=?");
             $stmt->bind_param("i",$id);
             $stmt->execute();
             $stmt->close();
             
-            // Update positions of patients after the served one (shift left)
-            $mysqli->query("UPDATE patients SET queue_position = queue_position - 1 WHERE queue_position > $servedPos AND status='waiting'");
+            // Update positions of patients after the deleted one (shift left)
+            $mysqli->query("UPDATE patients SET queue_position = queue_position - 1 WHERE queue_position > $deletedPos AND status='waiting'");
             
             $mysqli->commit();
-            echo json_encode(['status'=>'success','message'=>'Patient served and removed from queue']);
+            echo json_encode(['status'=>'success','message'=>'Patient deleted and queue updated']);
         } else {
             throw new Exception('Patient not found in waiting queue');
         }

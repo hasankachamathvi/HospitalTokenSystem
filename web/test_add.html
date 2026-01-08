@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Add Patient</title>
+</head>
+<body>
+    <h1>Test Add Patient</h1>
+    <form id="testForm">
+        <input type="text" id="name" value="Test Patient" placeholder="Name"><br><br>
+        <input type="email" id="email" value="test@test.com" placeholder="Email"><br><br>
+        <input type="tel" id="phone" value="1234567890" placeholder="Phone"><br><br>
+        <input type="datetime-local" id="date" value="2026-01-10T10:00"><br><br>
+        <select id="priority">
+            <option value="normal">Normal</option>
+            <option value="vip">VIP</option>
+            <option value="emergency">Emergency</option>
+        </select><br><br>
+        <select id="position">
+            <option value="end">End</option>
+            <option value="start">Start</option>
+        </select><br><br>
+        <button type="button" onclick="testAdd()">Add Patient</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        function testAdd() {
+            const formData = new FormData();
+            formData.append('name', document.getElementById('name').value);
+            formData.append('email', document.getElementById('email').value);
+            formData.append('phone', document.getElementById('phone').value);
+            formData.append('date', document.getElementById('date').value);
+            formData.append('priority', document.getElementById('priority').value);
+            formData.append('position', document.getElementById('position').value);
+
+            console.log('Sending data...');
+            
+            fetch('add_patient_position.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response data:', data);
+                document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('result').innerHTML = '<p style="color:red;">Error: ' + error.message + '</p>';
+            });
+        }
+    </script>
+</body>
+</html>

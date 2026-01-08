@@ -65,14 +65,32 @@
         <a href="services.html">Services</a>
         <a href="doctors.html">Doctors</a>
         <a href="booking.html">Book Appointment</a>
-        <a href="admin.html">Admin</a>
+        <a href="login.html">Login</a>
     </nav>
     <h1>HealthyLife Hospital</h1>
     <p>Your trusted partner in quality healthcare</p>
 </header>
 
 <main class="main-content">
+    <!-- Statistics Cards -->
+    <div style="display:flex; justify-content:center; gap:2rem; margin:2rem auto; max-width:900px; flex-wrap:wrap;">
+        <div style="background:#fff; padding:1.5rem 2rem; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.1); text-align:center; min-width:150px;">
+            <h3 style="margin:0; color:#666; font-size:14px;">Total Patients</h3>
+            <p id="totalPatients" style="font-size:2rem; margin:0.5rem 0; color:#007BFF; font-weight:bold;">0</p>
+        </div>
+        <div style="background:#fff; padding:1.5rem 2rem; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.1); text-align:center; min-width:150px;">
+            <h3 style="margin:0; color:#666; font-size:14px;">Waiting</h3>
+            <p id="waitingPatients" style="font-size:2rem; margin:0.5rem 0; color:#ffc107; font-weight:bold;">0</p>
+        </div>
+        <div style="background:#fff; padding:1.5rem 2rem; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.1); text-align:center; min-width:150px;">
+            <h3 style="margin:0; color:#666; font-size:14px;">Served</h3>
+            <p id="servedPatients" style="font-size:2rem; margin:0.5rem 0; color:#28a745; font-weight:bold;">0</p>
+        </div>
+    </div>
+
     <div class="booking-card">
+        <h2 style="margin-top:0;">Book Appointment</h2>
+        <p style="font-size:12px; color:#666; margin-bottom:1rem;">All bookings are added as Normal priority</p>
         <input type="text" id="patientName" placeholder="Full Name">
         <input type="email" id="patientEmail" placeholder="Email">
         <input type="tel" id="patientPhone" placeholder="Phone">
@@ -89,6 +107,7 @@
             <th>Email</th>
             <th>Phone</th>
             <th>Date</th>
+            <th>Priority</th>
         </tr>
         </thead>
         <tbody id="queueList"></tbody>
@@ -99,7 +118,6 @@
     <p>© 2026 HealthyLife Hospital. All rights reserved.</p>
 </footer>
 
-<script src="linkedlist.js"></script>
 <script>
     function bookPatient() {
         const patient = {
@@ -113,31 +131,115 @@
             return alert("Please fill all fields");
         }
 
-        queue.insertAtEnd(patient);
-        displayQueue("queueList");
+        // Send data to server
+        const formData = new FormData();
+        formData.append('name', patient.name);
+        formData.append('email', patient.email);
+        formData.append('phone', patient.phone);
+        formData.append('date', patient.date);
 
-        document.getElementById("patientName").value = "";
-        document.getElementById("patientEmail").value = "";
-        document.getElementById("patientPhone").value = "";
-        document.getElementById("appointmentDate").value = "";
-    }
-
-    function displayQueue(tableId) {
-        const table = document.getElementById(tableId);
-        table.innerHTML = "";
-        const patients = queue.traverse();
-        patients.forEach((p, index) => {
-            const row = table.insertRow();
-            row.insertCell(0).innerText = index + 1;
-            row.insertCell(1).innerText = p.name;
-            row.insertCell(2).innerText = p.email;
-            row.insertCell(3).innerText = p.phone;
-            row.insertCell(4).innerText = p.date;
+        fetch('add_patient.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.status === 'success') {
+                alert('Appointment booked successfully!');
+                // Clear form
+                document.getElementById("patientName").value = "";
+                document.getElementById("patientEmail").value = "";
+                document.getElementById("patientPhone").value = "";
+                document.getElementById("appointmentDate").value = "";
+                // Refresh queue
+                displayQueue();
+            } else {
+                alert('Error: ' + (data.message || 'Failed to book appointment'));
+            }
+        })
+        .catch(error => {
+            alert('Error booking appointment');
+            console.error(error);
         });
     }
 
-    // Optional: live update
-    setInterval(() => displayQueue("queueList"), 2000);
+    function displayQueue() {
+        fetch('get_queue.php')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(patients => {
+            console.log('Fetched patients:', patients);
+            const table = document.getElementById("queueList");
+            table.innerHTML = "";
+            
+            if (!patients || patients.length === 0) {
+                const row = table.insertRow();
+                const cell = row.insertCell(0);
+                cell.colSpan = 6;
+                cell.innerText = "No appointments in queue";
+                cell.style.textAlign = "center";
+                
+                // Update stats to 0
+                document.getElementById('totalPatients').innerText = '0';
+                document.getElementById('waitingPatients').innerText = '0';
+                return;
+            }
+            
+            let waitingCount = 0;
+            
+            patients.forEach((p, index) => {
+                // Priority badge color
+                let priorityColor = '#28a745'; // green for normal
+                if(p.priority === 'vip') priorityColor = '#ffc107'; // yellow
+                if(p.priority === 'emergency') priorityColor = '#dc3545'; // red
+                
+                const row = table.insertRow();
+                row.insertCell(0).innerText = p.queue_position || (index + 1);
+                row.insertCell(1).innerText = p.name || 'N/A';
+                row.insertCell(2).innerText = p.email || 'N/A';
+                row.insertCell(3).innerText = p.phone || 'N/A';
+                row.insertCell(4).innerText = p.date || 'N/A';
+                
+                const priorityCell = row.insertCell(5);
+                priorityCell.innerHTML = `<span style="background:${priorityColor};color:white;padding:3px 8px;border-radius:3px;font-size:12px;">${p.priority?.toUpperCase() || 'NORMAL'}</span>`;
+                
+                if(p.status === 'waiting') waitingCount++;
+            });
+            
+            // Update statistics
+            document.getElementById('totalPatients').innerText = patients.length;
+            document.getElementById('waitingPatients').innerText = waitingCount;
+            
+            // Fetch served count
+            fetch('get_served_count.php')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('servedPatients').innerText = data.count || 0;
+            })
+            .catch(error => console.error('Error fetching served count:', error));
+        })
+        .catch(error => {
+            console.error('Error fetching queue:', error);
+            const table = document.getElementById("queueList");
+            table.innerHTML = "";
+            const row = table.insertRow();
+            const cell = row.insertCell(0);
+            cell.colSpan = 6;
+            cell.innerText = "Error loading appointments. Please check console.";
+            cell.style.textAlign = "center";
+            cell.style.color = "red";
+        });
+    }
+
+    // Load queue on page load
+    displayQueue();
+
+    // Optional: live update every 2 seconds
+    setInterval(() => displayQueue(), 2000);
 </script>
 
 </body>
