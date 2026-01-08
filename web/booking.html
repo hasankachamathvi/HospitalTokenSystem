@@ -147,7 +147,7 @@
         .then(response => response.json())
         .then(data => {
             if(data.status === 'success') {
-                // Add to LinkedList using insertAtEnd (normal priority patients go to end)
+                // Add data to LinkedList
                 console.log('Using LinkedList: Adding patient to end of queue (insertAtEnd operation)');
                 patientQueue.insertAtEnd(patient);
                 console.log('Current LinkedList queue:', patientQueue.traverse());
@@ -181,13 +181,12 @@
         .then(patients => {
             console.log('Fetched patients:', patients);
             
-            // Rebuild LinkedList from database
             patientQueue.head = null; // Reset LinkedList
             patients.forEach(p => {
-                patientQueue.insertAtEnd(p); // Populate LinkedList
+                patientQueue.insertAtEnd(p); 
             });
             
-            // Get patients from LinkedList using traverse method
+            // Get patients from traverse method
             const queuePatients = patientQueue.traverse();
             console.log('LinkedList Queue (traverse):', queuePatients);
             
@@ -210,10 +209,10 @@
             let waitingCount = 0;
             
             queuePatients.forEach((p, index) => {
-                // Priority badge color
-                let priorityColor = '#28a745'; // green for normal
-                if(p.priority === 'vip') priorityColor = '#ffc107'; // yellow
-                if(p.priority === 'emergency') priorityColor = '#dc3545'; // red
+                // set badge color
+                let priorityColor = '#28a745'; 
+                if(p.priority === 'vip') priorityColor = '#ffc107'; 
+                if(p.priority === 'emergency') priorityColor = '#dc3545'; 
                 
                 const row = table.insertRow();
                 row.insertCell(0).innerText = p.queue_position || (index + 1);
@@ -226,7 +225,7 @@
                 if(p.status === 'waiting') waitingCount++;
             });
             
-            // Update statistics
+            // Update 
             document.getElementById('totalPatients').innerText = patients.length;
             document.getElementById('waitingPatients').innerText = waitingCount;
             
@@ -251,10 +250,10 @@
         });
     }
 
-    // Load queue on page load
+    // page load
     displayQueue();
 
-    // Optional: live update every 2 seconds
+    // live update
     setInterval(() => displayQueue(), 2000);
 </script>
 

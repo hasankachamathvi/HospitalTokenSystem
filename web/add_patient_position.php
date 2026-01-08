@@ -15,10 +15,10 @@ $date = $_POST['date'] ?? '';
 $priority = $_POST['priority'] ?? 'normal'; // normal, vip, emergency
 $position = $_POST['position'] ?? 'end'; // start, end, after
 
-// Convert datetime-local format to MySQL datetime format
+// Convert datetime
 if($date) {
     $date = str_replace('T', ' ', $date);
-    if(strlen($date) == 16) { // If format is "2026-01-10 10:00", add seconds
+    if(strlen($date) == 16) { 
         $date .= ':00';
     }
 }
@@ -33,12 +33,12 @@ $mysqli->begin_transaction();
 try {
     // Automatic priority-based positioning
     if($priority === 'emergency') {
-        // Emergency: Insert at the very beginning (before all patients)
+        // Emergency- Insert at the front 
         $mysqli->query("UPDATE patients SET queue_position = queue_position + 1 WHERE status='waiting'");
         $queuePos = 1;
     } 
     elseif($priority === 'vip') {
-        // VIP: Insert after emergency patients but before normal patients
+        // VIP- Insert after emergency patients but before normal patients
         $result = $mysqli->query("SELECT MAX(queue_position) as max_pos FROM patients WHERE status='waiting' AND priority='emergency'");
         $row = $result->fetch_assoc();
         $afterEmergency = $row['max_pos'] ?? 0;
@@ -48,7 +48,7 @@ try {
         $queuePos = $afterEmergency + 1;
     }
     else {
-        // Normal: Insert at the end (after all patients)
+        // Normal- Insert at the end 
         $result = $mysqli->query("SELECT MAX(queue_position) as max_pos FROM patients WHERE status='waiting'");
         $row = $result->fetch_assoc();
         $queuePos = ($row['max_pos'] ?? 0) + 1;

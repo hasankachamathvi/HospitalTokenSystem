@@ -14,11 +14,11 @@ if (!$username || !$password) {
 
 $mysqli = getDBConnection();
 
-// Check if admins table exists
+//Check if admins table exists
 $tableCheck = $mysqli->query("SHOW TABLES LIKE 'admins'");
 
 if ($tableCheck && $tableCheck->num_rows > 0) {
-    // Use database authentication
+    //database authentication
     $stmt = $mysqli->prepare("SELECT id, username, full_name FROM admins WHERE username = ? AND password = ?");
     $stmt->bind_param("ss", $username, $password);
     $stmt->execute();
@@ -27,19 +27,19 @@ if ($tableCheck && $tableCheck->num_rows > 0) {
     if ($result->num_rows === 1) {
         $admin = $result->fetch_assoc();
         
-        // Login successful
+        //Login successful
         $_SESSION['admin_logged_in'] = true;
         $_SESSION['admin_id'] = $admin['id'];
         $_SESSION['admin_username'] = $admin['username'];
         $_SESSION['admin_name'] = $admin['full_name'];
         
-        // Update last login time
+        //Update last login time
         $updateStmt = $mysqli->prepare("UPDATE admins SET last_login = NOW() WHERE id = ?");
         $updateStmt->bind_param("i", $admin['id']);
         $updateStmt->execute();
         $updateStmt->close();
         
-        // Log successful login
+        //Log successful login
         $logCheck = $mysqli->query("SHOW TABLES LIKE 'login_logs'");
         if ($logCheck && $logCheck->num_rows > 0) {
             $logStmt = $mysqli->prepare("INSERT INTO login_logs (username, ip_address, status, message) VALUES (?, ?, 'success', 'Login successful')");
@@ -50,7 +50,7 @@ if ($tableCheck && $tableCheck->num_rows > 0) {
         
         echo json_encode(['status' => 'success', 'message' => 'Login successful']);
     } else {
-        // Log failed login attempt
+        //failed login
         $logCheck = $mysqli->query("SHOW TABLES LIKE 'login_logs'");
         if ($logCheck && $logCheck->num_rows > 0) {
             $logStmt = $mysqli->prepare("INSERT INTO login_logs (username, ip_address, status, message) VALUES (?, ?, 'failed', 'Invalid credentials')");
@@ -63,7 +63,7 @@ if ($tableCheck && $tableCheck->num_rows > 0) {
     }
     $stmt->close();
 } else {
-    // Fallback to hardcoded credentials if table doesn't exist
+    // if table doesn't exist
     if ($username === 'admin' && $password === 'admin123') {
         $_SESSION['admin_logged_in'] = true;
         $_SESSION['admin_username'] = $username;

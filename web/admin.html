@@ -232,13 +232,13 @@
             try {
                 const data = JSON.parse(text);
                 if(data.status === 'success') {
-                    // Add to LinkedList based on priority
+                    
                     if(patient.priority === 'emergency') {
                         console.log('Using LinkedList: Adding EMERGENCY patient (insertAtBeginning operation)');
                         patientQueue.insertAtBeginning(patient);
                     } else if(patient.priority === 'vip') {
                         console.log('Using LinkedList: Adding VIP patient (insertAtPosition operation)');
-                        // Insert VIP after emergency but before normal
+                       
                         const patients = patientQueue.traverse();
                         let insertPos = patients.findIndex(p => p.priority !== 'emergency');
                         if(insertPos === -1) insertPos = patients.length;
@@ -250,14 +250,14 @@
                     console.log('Current LinkedList queue:', patientQueue.traverse());
                     
                     alert('Patient added successfully!');
-                    // Clear form
+                    
                     document.getElementById("adminPatientName").value = "";
                     document.getElementById("adminPatientEmail").value = "";
                     document.getElementById("adminPatientPhone").value = "";
                     document.getElementById("adminPatientDate").value = "";
                     document.getElementById("adminPriority").value = "normal";
                     closeAddPatient();
-                    // Refresh tables
+                    
                     updateAdminTables();
                 } else {
                     alert('Error: ' + (data.message || 'Failed to add patient'));
@@ -286,7 +286,7 @@
             
             // Get patients from LinkedList using traverse method
             const queuePatients = patientQueue.traverse();
-            console.log('LinkedList Queue:', queuePatients); // Show LinkedList is being used
+            console.log('LinkedList Queue:', queuePatients); 
             
             const manageTable = document.getElementById('adminQueueTable');
             const liveTable = document.getElementById('adminLiveQueueTable');
@@ -358,13 +358,13 @@
         });
     }
 
-    // Serve patient - uses LinkedList deleteFromBeginning
+    // Serve patient - deleteFromBeginning
     function servePatient(patientId) {
         if(!confirm('Mark this patient as served?')) return;
         
         console.log('Using LinkedList: Serving patient (deleteFromBeginning operation)');
         
-        // Remove from LinkedList first (simulating queue FIFO)
+        // Remove from LinkedList first
         patientQueue.deleteFromBeginning();
         console.log('Patient removed from LinkedList. Remaining queue:', patientQueue.traverse());
         
@@ -388,7 +388,7 @@
         });
     }
     
-    // Delete patient - uses LinkedList deleteFromPosition
+    // Delete patient - deleteFromPosition
     function deletePatient(patientId) {
         if(!confirm('Are you sure you want to delete this patient from the queue?')) return;
         
@@ -424,10 +424,10 @@
         });
     }
 
-    // Load data on page load
+    // Load data 
     updateAdminTables();
 
-    // Live update every 2 sec
+    // Live update 
     setInterval(updateAdminTables, 2000);
 </script>
 

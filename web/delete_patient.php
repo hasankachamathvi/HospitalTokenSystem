@@ -13,7 +13,7 @@ if($id){
         if($result && $row = $result->fetch_assoc()) {
             $deletedPos = $row['queue_position'];
             
-            // Delete the patient (remove from linked list)
+            // Delete the patient 
             $stmt = $mysqli->prepare("DELETE FROM patients WHERE id=?");
             $stmt->bind_param("i",$id);
             $stmt->execute();

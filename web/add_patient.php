@@ -9,10 +9,10 @@ $email = $_POST['email'] ?? '';
 $phone = $_POST['phone'] ?? '';
 $date = $_POST['date'] ?? '';
 
-// Convert datetime-local format to MySQL datetime format
+// Convert datetime
 if($date) {
     $date = str_replace('T', ' ', $date);
-    if(strlen($date) == 16) { // If format is "2026-01-10 10:00", add seconds
+    if(strlen($date) == 16) {
         $date .= ':00';
     }
 }
@@ -22,7 +22,7 @@ if(!$name || !$email || !$phone || !$date){
     exit;
 }
 
-// Regular bookings are always normal priority and go to the end
+// Regular bookings 
 $result = $mysqli->query("SELECT MAX(queue_position) as max_pos FROM patients WHERE status='waiting'");
 $row = $result->fetch_assoc();
 $queuePos = ($row['max_pos'] ?? 0) + 1;

@@ -1,4 +1,3 @@
-// linkedlist.js
 class Node {
     constructor(patient) { // patient = {name, email, phone, date}
         this.data = patient;
